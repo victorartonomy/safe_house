@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:path/path.dart' as p;
 
 import '../../../../core/errors/failures.dart';
 import '../../domain/entities/encrypted_file.dart';
@@ -72,7 +73,8 @@ class EncryptionCubit extends Cubit<EncryptionState> {
   Future<void> pickFileForDecryption() async {
     try {
       final result = await FilePicker.platform.pickFiles(
-        type: FileType.any,
+        type: FileType.custom,
+        allowedExtensions: const ['enc'],
         allowMultiple: false,
       );
 
@@ -83,6 +85,12 @@ class EncryptionCubit extends Cubit<EncryptionState> {
 
       if (path == null) {
         emit(const EncryptionError(message: 'Could not resolve file path.'));
+        return;
+      }
+
+      final extension = p.extension(file.name).toLowerCase();
+      if (extension != '.enc') {
+        emit(const EncryptionError(message: 'Please select an encrypted .enc file.'));
         return;
       }
 

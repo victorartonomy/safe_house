@@ -141,7 +141,26 @@ class EncryptionRepositoryImpl implements EncryptionRepository {
   Future<void> clearHistory() => _localDataSource.clearAll();
 
   @override
-  Future<void> deleteHistoryEntry(String id) => _localDataSource.deleteById(id);
+  Future<void> deleteHistoryEntry(String id) async {
+    final records = await _localDataSource.getAllRecords();
+    final record = records.firstWhere(
+      (entry) => entry.id == id,
+      orElse: () => throw StorageFailure('History record not found.'),
+    );
+
+    try {
+      final file = File(record.encryptedPath);
+      if (await file.exists()) {
+        await file.delete();
+      }
+
+      await _localDataSource.deleteById(id);
+    } on Failure {
+      rethrow;
+    } catch (e) {
+      throw StorageFailure('Failed to delete saved file: $e');
+    }
+  }
 
   @override
   String generateKey() => _encryptionService.generateKey();

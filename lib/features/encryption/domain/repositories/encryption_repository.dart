@@ -38,7 +38,7 @@ abstract class EncryptionRepository {
   /// Permanently removes all records from the Hive history box.
   Future<void> clearHistory();
 
-  /// Removes a single history record by [id].
+  /// Removes a single history record by [id] and deletes its saved file.
   Future<void> deleteHistoryEntry(String id);
 
   /// Generates a cryptographically random AES-256 key.

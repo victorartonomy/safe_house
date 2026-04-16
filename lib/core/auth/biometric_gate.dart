@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 
 /// Wraps a child widget with a biometric / device-credential authentication
@@ -65,13 +66,30 @@ class _BiometricGateState extends State<BiometricGate> {
         localizedReason: widget.reason,
         options: const AuthenticationOptions(
           biometricOnly: false, // Allow PIN/pattern fallback.
-          stickyAuth: true,     // Survive an app-backgrounding interruption.
+          stickyAuth: true, // Survive an app-backgrounding interruption.
         ),
       );
 
       if (!mounted) return;
-      setState(() => _state =
-          ok ? _GateState.authenticated : _GateState.failed);
+      setState(
+        () => _state = ok ? _GateState.authenticated : _GateState.failed,
+      );
+    } on PlatformException catch (e) {
+      if (!mounted) return;
+
+      if (e.code == 'NotAvailable') {
+        // Some devices/emulators report that no secure credentials are
+        // available even though the feature is technically supported.
+        // History should remain usable in that case rather than locking
+        // the user out behind an auth failure screen.
+        setState(() => _state = _GateState.unsupported);
+        return;
+      }
+
+      setState(() {
+        _state = _GateState.failed;
+        _errorMessage = e.message ?? e.toString();
+      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -97,8 +115,7 @@ class _BiometricGateState extends State<BiometricGate> {
         return _GateScaffold(
           icon: Icons.lock_outline,
           title: 'Authentication Required',
-          subtitle: _errorMessage ??
-              'Verify your identity to view saved keys.',
+          subtitle: _errorMessage ?? 'Verify your identity to view saved keys.',
           primaryLabel: 'Try Again',
           onPrimary: _authenticate,
         );

@@ -56,8 +56,7 @@ class StoragePermission {
 
     // Step 3/4 — actually request. On Android 11+ this opens the
     // "Allow access to manage all files" settings page.
-    PermissionStatus status =
-        await Permission.manageExternalStorage.request();
+    PermissionStatus status = await Permission.manageExternalStorage.request();
 
     // Older devices: the manageExternalStorage request short-circuits
     // to "granted" on API < 30, but request the legacy permission too

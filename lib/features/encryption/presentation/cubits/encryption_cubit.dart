@@ -38,8 +38,8 @@ class EncryptionCubit extends Cubit<EncryptionState> {
   String? _selectedFileName;
 
   EncryptionCubit({required EncryptionRepository repository})
-      : _repository = repository,
-        super(const EncryptionInitial());
+    : _repository = repository,
+      super(const EncryptionInitial());
 
   // ── File picking ───────────────────────────────────────────────────────────
 
@@ -63,7 +63,9 @@ class EncryptionCubit extends Cubit<EncryptionState> {
 
       _selectedFilePath = path;
       _selectedFileName = _canonicalName(file);
-      emit(EncryptionFileSelected(filePath: path, fileName: _selectedFileName!));
+      emit(
+        EncryptionFileSelected(filePath: path, fileName: _selectedFileName!),
+      );
     } catch (e) {
       emit(EncryptionError(message: 'File picker error: $e'));
     }
@@ -90,13 +92,19 @@ class EncryptionCubit extends Cubit<EncryptionState> {
 
       final extension = p.extension(file.name).toLowerCase();
       if (extension != '.enc') {
-        emit(const EncryptionError(message: 'Please select an encrypted .enc file.'));
+        emit(
+          const EncryptionError(
+            message: 'Please select an encrypted .enc file.',
+          ),
+        );
         return;
       }
 
       _selectedFilePath = path;
       _selectedFileName = _canonicalName(file);
-      emit(EncryptionFileSelected(filePath: path, fileName: _selectedFileName!));
+      emit(
+        EncryptionFileSelected(filePath: path, fileName: _selectedFileName!),
+      );
     } catch (e) {
       emit(EncryptionError(message: 'File picker error: $e'));
     }
@@ -131,12 +139,20 @@ class EncryptionCubit extends Cubit<EncryptionState> {
     final filePath = _selectedFilePath;
 
     if (filePath == null) {
-      emit(const EncryptionError(message: 'No file selected. Please pick a file first.'));
+      emit(
+        const EncryptionError(
+          message: 'No file selected. Please pick a file first.',
+        ),
+      );
       return;
     }
 
     if (secretKey.trim().isEmpty) {
-      emit(const EncryptionError(message: 'Please enter or generate a secret key.'));
+      emit(
+        const EncryptionError(
+          message: 'Please enter or generate a secret key.',
+        ),
+      );
       return;
     }
 
@@ -167,7 +183,11 @@ class EncryptionCubit extends Cubit<EncryptionState> {
     final filePath = _selectedFilePath;
 
     if (filePath == null) {
-      emit(const EncryptionError(message: 'No file selected. Please pick an encrypted file first.'));
+      emit(
+        const EncryptionError(
+          message: 'No file selected. Please pick an encrypted file first.',
+        ),
+      );
       return;
     }
 

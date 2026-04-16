@@ -7,6 +7,34 @@ import 'history_screen.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
+  Future<void> _showAboutDialog(BuildContext context) {
+    return showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        title: const Text('About SafeHouse'),
+        content: const Text(
+          'SafeHouse is a local AES-256 file encryption app. It lets you '
+          'encrypt files, decrypt them back on-device, and keep a secure '
+          'history of saved keys and file records without sending data off '
+          'your device.\n\n'
+          'Author: Ainel\n'
+          'email: ainel@gmail.com\n'
+          'guide: Some random lecturer\n'
+          'purpose: Final Year Project\n\n'
+          'college: JSS, Dharwad\n',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -30,8 +58,7 @@ class HomeScreen extends StatelessWidget {
                       color: theme.colorScheme.primary.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color:
-                            theme.colorScheme.primary.withValues(alpha: 0.3),
+                        color: theme.colorScheme.primary.withValues(alpha: 0.3),
                       ),
                     ),
                     child: Icon(
@@ -44,10 +71,7 @@ class HomeScreen extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'SafeHouse',
-                        style: theme.textTheme.headlineMedium,
-                      ),
+                      Text('SafeHouse', style: theme.textTheme.headlineMedium),
                       Text(
                         'AES-256 File Encryption',
                         style: theme.textTheme.bodyMedium,
@@ -61,9 +85,7 @@ class HomeScreen extends StatelessWidget {
 
               Text(
                 'ACTIONS',
-                style: theme.textTheme.labelSmall?.copyWith(
-                  letterSpacing: 1.5,
-                ),
+                style: theme.textTheme.labelSmall?.copyWith(letterSpacing: 1.5),
               ),
               const SizedBox(height: 12),
 
@@ -100,6 +122,28 @@ class HomeScreen extends StatelessWidget {
                   'End-to-end encrypted · Keys never leave your device',
                   style: theme.textTheme.labelSmall,
                   textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Center(
+                child: InkWell(
+                  onTap: () => _showAboutDialog(context),
+                  borderRadius: BorderRadius.circular(4),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 4,
+                    ),
+                    child: Text(
+                      'About',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        decoration: TextDecoration.underline,
+                        decorationColor: theme.colorScheme.primary,
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 24),

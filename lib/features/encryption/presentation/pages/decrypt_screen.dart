@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path/path.dart' as p;
 
+import '../../../../core/permissions/storage_permission.dart';
 import '../../../../injection_container.dart';
 import '../cubits/encryption_cubit.dart';
 import '../widgets/file_picker_tile.dart';
@@ -30,6 +31,19 @@ class _DecryptScreenState extends State<DecryptScreen> {
   void dispose() {
     _keyController.dispose();
     super.dispose();
+  }
+
+  /// Same All-Files-Access check the encrypt screen does — without it
+  /// we can neither read the user-picked encrypted file nor write the
+  /// recovered plaintext to /storage/emulated/0/SafeHouse/decrypted files/.
+  Future<void> _onDecryptPressed(
+    BuildContext context,
+    EncryptionCubit cubit,
+  ) async {
+    final granted = await StoragePermission.ensure(context);
+    if (!granted) return;
+    if (!context.mounted) return;
+    cubit.decryptSelectedFile(_keyController.text);
   }
 
   @override
@@ -117,9 +131,7 @@ class _DecryptScreenState extends State<DecryptScreen> {
                     ),
                     onPressed: isLoading
                         ? null
-                        : () => cubit.decryptSelectedFile(
-                              _keyController.text,
-                            ),
+                        : () => _onDecryptPressed(context, cubit),
                     child: isLoading
                         ? _LoadingRow(message: loadingState.message)
                         : const Text('Decrypt File'),

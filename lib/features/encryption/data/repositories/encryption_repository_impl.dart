@@ -50,7 +50,7 @@ class EncryptionRepositoryImpl implements EncryptionRepository {
         id: id,
       );
       final outputPath = await _resolveOutputPath(
-        subfolder: 'encrypted',
+        subfolder: 'encrypted files',
         filename: encFilename,
       );
 
@@ -114,7 +114,7 @@ class EncryptionRepositoryImpl implements EncryptionRepository {
         id: _uuid.v4(),
       );
       final outputPath = await _resolveOutputPath(
-        subfolder: 'decrypted',
+        subfolder: 'decrypted files',
         filename: decFilename,
       );
 
@@ -170,33 +170,45 @@ class EncryptionRepositoryImpl implements EncryptionRepository {
 
   static String _two(int n) => n.toString().padLeft(2, '0');
 
-  /// Returns `<appStorageRoot>/SafeHouse/<subfolder>/<filename>`.
+  /// Returns `<sharedStorageRoot>/SafeHouse/<subfolder>/<filename>`.
   ///
-  /// Uses **app-specific storage** on every platform:
-  ///   - Android  → `getExternalStorageDirectory()`  (no permission needed
-  ///                on Android 10+, visible via most file managers, and
-  ///                cleaned up automatically on app uninstall)
-  ///   - Other    → `getApplicationDocumentsDirectory()`
+  /// Uses **public shared storage** on Android so files are visible
+  /// in any file-manager app under "Internal storage › SafeHouse":
+  ///   - Android  → `/storage/emulated/0/SafeHouse/...`
+  ///   - iOS      → `<app sandbox>/Documents/SafeHouse/...`
+  ///                (iOS sandbox model means there's no equivalent of
+  ///                Android's user-visible shared root)
+  ///   - Desktop  → platform-appropriate documents dir
   ///
-  /// This intentionally *replaces* the previous behaviour of writing to
-  /// `/storage/emulated/0/SafeHouse/` which required MANAGE_EXTERNAL_STORAGE.
+  /// On Android 11+ this path requires the **MANAGE_EXTERNAL_STORAGE**
+  /// permission ("All files access"); the caller is expected to have
+  /// already gone through [StoragePermission.ensure] before invoking
+  /// encrypt/decrypt. If we get here without permission, [Directory.create]
+  /// raises a [FileSystemException] which we surface as a [StorageFailure].
   Future<String> _resolveOutputPath({
     required String subfolder,
     required String filename,
   }) async {
     final Directory root;
     if (Platform.isAndroid) {
-      // Falls back to documents directory on the extremely rare Android
-      // device where no external storage is mounted.
-      root = await getExternalStorageDirectory() ??
-          await getApplicationDocumentsDirectory();
+      // The canonical primary-storage root on essentially every Android
+      // device since 4.2. /sdcard is a symlink to this same path.
+      root = Directory('/storage/emulated/0');
     } else {
       root = await getApplicationDocumentsDirectory();
     }
 
     final dir = Directory(p.join(root.path, 'SafeHouse', subfolder));
-    if (!await dir.exists()) {
-      await dir.create(recursive: true);
+    try {
+      if (!await dir.exists()) {
+        await dir.create(recursive: true);
+      }
+    } on FileSystemException catch (e) {
+      throw StorageFailure(
+        'Could not create output folder "${dir.path}". '
+        'Make sure SafeHouse has "All files access" enabled in Settings. '
+        '(${e.osError?.message ?? e.message})',
+      );
     }
     return p.join(dir.path, filename);
   }

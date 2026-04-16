@@ -43,6 +43,12 @@ dependencies:
   # History screen (which surfaces plaintext secret keys).
   local_auth: ^2.3.0
 
+  # Runtime permissions — needed because we write to public shared
+  # storage (/storage/emulated/0/SafeHouse/) so files are visible in
+  # any file manager. Android 11+ requires MANAGE_EXTERNAL_STORAGE for
+  # arbitrary writes; Android 6–10 uses WRITE_EXTERNAL_STORAGE.
+  permission_handler: ^11.4.0
+
   # Unique IDs for history entries + filename disambiguation.
   uuid: ^4.5.1
 

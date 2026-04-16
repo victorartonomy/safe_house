@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path/path.dart' as p;
 
+import '../../../../core/permissions/storage_permission.dart';
 import '../../../../injection_container.dart';
 import '../cubits/encryption_cubit.dart';
 import '../widgets/file_picker_tile.dart';
@@ -30,6 +31,20 @@ class _EncryptScreenState extends State<EncryptScreen> {
   void dispose() {
     _keyController.dispose();
     super.dispose();
+  }
+
+  /// Gates the actual encrypt call behind the All-Files-Access permission.
+  /// We can't write to /storage/emulated/0/SafeHouse/ without it on
+  /// Android 11+, so checking after launching the operation would surface
+  /// a confusing FileSystemException mid-encrypt.
+  Future<void> _onEncryptPressed(
+    BuildContext context,
+    EncryptionCubit cubit,
+  ) async {
+    final granted = await StoragePermission.ensure(context);
+    if (!granted) return; // user cancelled / denied — error already shown
+    if (!context.mounted) return;
+    cubit.encryptSelectedFile(_keyController.text);
   }
 
   @override
@@ -126,9 +141,7 @@ class _EncryptScreenState extends State<EncryptScreen> {
                   child: ElevatedButton(
                     onPressed: isLoading
                         ? null
-                        : () => cubit.encryptSelectedFile(
-                              _keyController.text,
-                            ),
+                        : () => _onEncryptPressed(context, cubit),
                     child: isLoading
                         ? _LoadingRow(
                             message: loadingState.message)

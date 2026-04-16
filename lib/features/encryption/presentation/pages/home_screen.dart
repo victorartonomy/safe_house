@@ -1,0 +1,182 @@
+import 'package:flutter/material.dart';
+
+import 'decrypt_screen.dart';
+import 'encrypt_screen.dart';
+import 'history_screen.dart';
+
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 48),
+
+              // ── Hero header ────────────────────────────────────────────
+              Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color:
+                            theme.colorScheme.primary.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.lock_outline,
+                      color: theme.colorScheme.primary,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'SafeHouse',
+                        style: theme.textTheme.headlineMedium,
+                      ),
+                      Text(
+                        'AES-256 File Encryption',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 48),
+
+              Text(
+                'ACTIONS',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  letterSpacing: 1.5,
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // ── Navigation cards ───────────────────────────────────────
+              _NavCard(
+                icon: Icons.lock_outline,
+                title: 'Encrypt File',
+                subtitle: 'Secure any file with AES-256',
+                accentColor: theme.colorScheme.primary,
+                onTap: () => Navigator.push(context, EncryptScreen.route()),
+              ),
+              const SizedBox(height: 10),
+              _NavCard(
+                icon: Icons.lock_open_outlined,
+                title: 'Decrypt File',
+                subtitle: 'Recover an encrypted file',
+                accentColor: const Color(0xFF4FC3F7),
+                onTap: () => Navigator.push(context, DecryptScreen.route()),
+              ),
+              const SizedBox(height: 10),
+              _NavCard(
+                icon: Icons.history_outlined,
+                title: 'History',
+                subtitle: 'View saved keys & encrypted files',
+                accentColor: const Color(0xFFFFB74D),
+                onTap: () => Navigator.push(context, HistoryScreen.route()),
+              ),
+
+              const Spacer(),
+
+              // ── Footer ─────────────────────────────────────────────────
+              Center(
+                child: Text(
+                  'End-to-end encrypted · Keys never leave your device',
+                  style: theme.textTheme.labelSmall,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 24),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NavCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color accentColor;
+  final VoidCallback onTap;
+
+  const _NavCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.accentColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Material(
+      color: theme.colorScheme.surface,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        splashColor: accentColor.withValues(alpha: 0.06),
+        highlightColor: accentColor.withValues(alpha: 0.04),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: theme.colorScheme.outline),
+          ),
+          child: Row(
+            children: [
+              // Colored icon badge
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: accentColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: accentColor, size: 20),
+              ),
+              const SizedBox(width: 14),
+              // Text
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: theme.textTheme.titleMedium),
+                    const SizedBox(height: 2),
+                    Text(subtitle, style: theme.textTheme.bodyMedium),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                color: theme.colorScheme.outline,
+                size: 20,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

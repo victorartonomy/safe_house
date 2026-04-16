@@ -19,10 +19,11 @@ class HomeScreen extends StatelessWidget {
           'encrypt files, decrypt them back on-device, and keep a secure '
           'history of saved keys and file records without sending data off '
           'your device.\n\n'
-          'Author: Ainel\n'
-          'email: ainel@gmail.com\n'
-          'guide: Some random lecturer\n'
-          'purpose: Final Year Project\n\n'
+          'Author: AINEL MARZIA BELGAUMKAR N\n'
+          'email: ainalbelgaumkar@gmail.com\n'
+          'registration number: P02ME24S126003\n'
+          'guide: Manjula\n'
+          'purpose: Final Year Project\n'
           'college: JSS, Dharwad\n',
         ),
         actions: [

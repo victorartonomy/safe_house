@@ -21,9 +21,9 @@ class EncryptionRepositoryImpl implements EncryptionRepository {
     required AesEncryptionService encryptionService,
     required EncryptionLocalDataSource localDataSource,
     Uuid uuid = const Uuid(),
-  })  : _encryptionService = encryptionService,
-        _localDataSource = localDataSource,
-        _uuid = uuid;
+  }) : _encryptionService = encryptionService,
+       _localDataSource = localDataSource,
+       _uuid = uuid;
 
   // ── Public API ─────────────────────────────────────────────────────────────
 
@@ -84,12 +84,14 @@ class EncryptionRepositoryImpl implements EncryptionRepository {
   }) async {
     try {
       // Look up the Hive history record to recover the original filename
-      // (and therefore its extension). Falls back gracefully when the file
-      // was encrypted outside this device / not in history.
+      // (and therefore its extension). Prefer the exact path, but also
+      // fall back to matching the filename so copied/moved encrypted files
+      // can still be decrypted with their original extension intact.
       EncryptedFile? historyRecord;
       final allRecords = await _localDataSource.getAllRecords();
       for (final r in allRecords) {
-        if (r.encryptedPath == encryptedFilePath) {
+        if (r.encryptedPath == encryptedFilePath ||
+            p.basename(r.encryptedPath) == p.basename(encryptedFilePath)) {
           historyRecord = r;
           break;
         }
@@ -139,8 +141,7 @@ class EncryptionRepositoryImpl implements EncryptionRepository {
   Future<void> clearHistory() => _localDataSource.clearAll();
 
   @override
-  Future<void> deleteHistoryEntry(String id) =>
-      _localDataSource.deleteById(id);
+  Future<void> deleteHistoryEntry(String id) => _localDataSource.deleteById(id);
 
   @override
   String generateKey() => _encryptionService.generateKey();
@@ -161,7 +162,8 @@ class EncryptionRepositoryImpl implements EncryptionRepository {
     required String id,
   }) {
     final now = DateTime.now();
-    final ts = '${now.year}'
+    final ts =
+        '${now.year}'
         '${_two(now.month)}${_two(now.day)}_'
         '${_two(now.hour)}${_two(now.minute)}${_two(now.second)}';
     final shortId = id.replaceAll('-', '').substring(0, 8);

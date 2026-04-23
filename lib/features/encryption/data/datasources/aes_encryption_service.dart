@@ -19,9 +19,9 @@ import '../../../../core/errors/failures.dart';
 /// [compute]) so the UI never blocks and memory stays bounded regardless
 /// of file size.
 class AesEncryptionService {
-  static const int keyLength = 32;   // 256-bit key
-  static const int ivLength = 12;    // 96-bit IV — GCM standard
-  static const int tagLength = 16;   // 128-bit auth tag
+  static const int keyLength = 32; // 256-bit key
+  static const int ivLength = 12; // 96-bit IV — GCM standard
+  static const int tagLength = 16; // 128-bit auth tag
 
   /// Generates a cryptographically random 256-bit AES key.
   /// Returns the key as a standard base64 string safe for display/storage.
@@ -213,8 +213,7 @@ Future<void> _decryptEntryPoint(_CryptoJob job) async {
   try {
     // Stream ciphertext (everything after the IV). GCM's doFinal() will
     // consume the last 16 bytes as the auth tag.
-    await for (final chunk
-        in input.openRead(AesEncryptionService.ivLength)) {
+    await for (final chunk in input.openRead(AesEncryptionService.ivLength)) {
       final data = chunk is Uint8List ? chunk : Uint8List.fromList(chunk);
       // Decrypt output is bounded by input length (tag bytes are stripped),
       // but GCM still buffers a partial AES block internally. Match the
@@ -238,11 +237,15 @@ Future<void> _decryptEntryPoint(_CryptoJob job) async {
     // leave a half-written garbage file on disk.
     try {
       await sink.close();
-    } catch (_) {/* already closed */}
+    } catch (_) {
+      /* already closed */
+    }
     try {
       final partial = File(job.outputPath);
       if (await partial.exists()) await partial.delete();
-    } catch (_) {/* best effort */}
+    } catch (_) {
+      /* best effort */
+    }
     rethrow;
   }
 }

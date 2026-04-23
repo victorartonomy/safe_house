@@ -23,8 +23,9 @@ class ResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color =
-        isSuccess ? theme.colorScheme.primary : const Color(0xFFFF4D4D);
+    final color = isSuccess
+        ? theme.colorScheme.primary
+        : const Color(0xFFFF4D4D);
 
     return Container(
       width: double.infinity,
@@ -74,8 +75,7 @@ class ResultCard extends StatelessWidget {
           if (copyableValue != null) ...[
             const SizedBox(height: 10),
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
                 color: theme.colorScheme.surface,
                 borderRadius: BorderRadius.circular(8),
@@ -98,12 +98,14 @@ class ResultCard extends StatelessWidget {
                   GestureDetector(
                     onTap: () async {
                       await Clipboard.setData(
-                          ClipboardData(text: copyableValue!));
+                        ClipboardData(text: copyableValue!),
+                      );
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                                '${copyLabel ?? 'Value'} copied to clipboard'),
+                              '${copyLabel ?? 'Value'} copied to clipboard',
+                            ),
                             behavior: SnackBarBehavior.floating,
                             duration: const Duration(seconds: 2),
                           ),

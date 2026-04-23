@@ -14,11 +14,11 @@ class DecryptScreen extends StatefulWidget {
 
   /// Returns a [MaterialPageRoute] that provides a fresh [EncryptionCubit].
   static Route<void> route() => MaterialPageRoute(
-        builder: (_) => BlocProvider(
-          create: (_) => sl<EncryptionCubit>(),
-          child: const DecryptScreen(),
-        ),
-      );
+    builder: (_) => BlocProvider(
+      create: (_) => sl<EncryptionCubit>(),
+      child: const DecryptScreen(),
+    ),
+  );
 
   @override
   State<DecryptScreen> createState() => _DecryptScreenState();
@@ -63,9 +63,12 @@ class _DecryptScreenState extends State<DecryptScreen> {
                 SnackBar(
                   content: Text(state.message),
                   behavior: SnackBarBehavior.floating,
-                  backgroundColor: const Color(0xFFFF4D4D).withValues(alpha: 0.9),
+                  backgroundColor: const Color(
+                    0xFFFF4D4D,
+                  ).withValues(alpha: 0.9),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
               );
           }
@@ -75,16 +78,14 @@ class _DecryptScreenState extends State<DecryptScreen> {
           if (state is DecryptionSuccess) {
             return _DecryptSuccessView(
               outputPath: state.outputPath,
-              onDecryptAnother: () =>
-                  context.read<EncryptionCubit>().reset(),
+              onDecryptAnother: () => context.read<EncryptionCubit>().reset(),
             );
           }
 
           final cubit = context.read<EncryptionCubit>();
           final loadingState = state is EncryptionLoading ? state : null;
           final isLoading = loadingState != null;
-          final selectedFile =
-              state is EncryptionFileSelected ? state : null;
+          final selectedFile = state is EncryptionFileSelected ? state : null;
 
           // ── Form view ────────────────────────────────────────────────
           return SingleChildScrollView(

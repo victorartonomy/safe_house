@@ -4,7 +4,26 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import 'core/theme/theme_notifier.dart';
+import 'features/auth/data/datasources/auth_remote_datasource.dart';
+import 'features/auth/data/repositories/auth_repository_impl.dart';
+import 'features/auth/domain/repositories/auth_repository.dart';
+import 'features/auth/domain/usecases/get_current_user_usecase.dart';
+import 'features/auth/domain/usecases/sign_in_with_email_usecase.dart';
+import 'features/auth/domain/usecases/sign_in_with_google_usecase.dart';
+import 'features/auth/domain/usecases/sign_out_usecase.dart';
+import 'features/auth/domain/usecases/sign_up_with_email_usecase.dart';
+import 'features/auth/domain/usecases/delete_account_usecase.dart';
+import 'features/auth/presentation/cubits/auth_cubit.dart';
+import 'features/cloud/data/datasources/cloud_remote_datasource.dart';
+import 'features/cloud/data/repositories/cloud_repository_impl.dart';
+import 'features/cloud/domain/repositories/cloud_repository.dart';
+import 'features/settings/presentation/cubits/settings_cubit.dart';
 import 'features/encryption/data/datasources/aes_encryption_service.dart';
 import 'features/encryption/data/datasources/encryption_local_datasource.dart';
 import 'features/encryption/data/repositories/encryption_repository_impl.dart';
@@ -26,6 +45,14 @@ const _kHiveCipherKeyAlias = 'safehouse.hive.cipher.v1';
 /// Called once in [main] before [runApp], after Hive is initialised and
 /// adapters are registered.
 Future<void> init() async {
+  // ── Firebase & External ───────────────────────────────────────────────────
+  sl.registerLazySingleton(() => FirebaseAuth.instance);
+  sl.registerLazySingleton(() => GoogleSignIn());
+  sl.registerLazySingleton(() => FirebaseStorage.instance);
+
+  final sharedPreferences = await SharedPreferences.getInstance();
+  sl.registerLazySingleton(() => sharedPreferences);
+
   // ── Secure storage ────────────────────────────────────────────────────────
   // Stored on Android via EncryptedSharedPreferences (Keystore-backed) and
   // on iOS via the Keychain. Survives app updates; wiped on uninstall on
@@ -49,14 +76,26 @@ Future<void> init() async {
   );
 
   // ── Services ──────────────────────────────────────────────────────────────
-  sl.registerLazySingleton<AesEncryptionService>(
-    () => AesEncryptionService(),
-  );
+  sl.registerLazySingleton<AesEncryptionService>(() => AesEncryptionService());
 
   // ── Data sources ──────────────────────────────────────────────────────────
   sl.registerLazySingleton<EncryptionLocalDataSource>(
     () => EncryptionLocalDataSourceImpl(box: encryptedFilesBox),
   );
+
+  sl.registerLazySingleton<AuthRemoteDataSource>(
+    () => AuthRemoteDataSourceImpl(firebaseAuth: sl(), googleSignIn: sl()),
+  );
+
+  sl.registerLazySingleton<CloudRemoteDataSource>(
+    () => CloudRemoteDataSourceImpl(
+      firebaseStorage: sl(),
+      firebaseAuth: sl(),
+      sharedPreferences: sl(),
+    ),
+  );
+
+  sl.registerLazySingleton(() => ThemeNotifier(prefs: sl()));
 
   // ── Repositories ──────────────────────────────────────────────────────────
   sl.registerLazySingleton<EncryptionRepository>(
@@ -66,6 +105,22 @@ Future<void> init() async {
     ),
   );
 
+  sl.registerLazySingleton<AuthRepository>(
+    () => AuthRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  sl.registerLazySingleton<CloudRepository>(
+    () => CloudRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // ── Use Cases ─────────────────────────────────────────────────────────────
+  sl.registerLazySingleton(() => SignInWithEmailUseCase(sl()));
+  sl.registerLazySingleton(() => SignUpWithEmailUseCase(sl()));
+  sl.registerLazySingleton(() => SignInWithGoogleUseCase(sl()));
+  sl.registerLazySingleton(() => SignOutUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteAccountUseCase(sl()));
+  sl.registerLazySingleton(() => GetCurrentUserUseCase(sl()));
+
   // ── Cubits ────────────────────────────────────────────────────────────────
   // Factories ensure each screen receives a fresh instance with clean state.
   sl.registerFactory<EncryptionCubit>(
@@ -73,6 +128,23 @@ Future<void> init() async {
   );
   sl.registerFactory<HistoryCubit>(
     () => HistoryCubit(repository: sl<EncryptionRepository>()),
+  );
+  sl.registerLazySingleton<AuthCubit>(
+    () => AuthCubit(
+      signInWithEmail: sl(),
+      signUpWithEmail: sl(),
+      signInWithGoogle: sl(),
+      signOut: sl(),
+      deleteAccount: sl(),
+      getCurrentUser: sl(),
+    ),
+  );
+  sl.registerLazySingleton<SettingsCubit>(
+    () => SettingsCubit(
+      cloudRepository: sl(),
+      authCubit: sl(),
+      themeNotifier: sl(),
+    ),
   );
 }
 

@@ -20,8 +20,7 @@ class EncryptionLocalDataSourceImpl implements EncryptionLocalDataSource {
 
   final Box<EncryptedFile> _box;
 
-  EncryptionLocalDataSourceImpl({required Box<EncryptedFile> box})
-      : _box = box;
+  EncryptionLocalDataSourceImpl({required Box<EncryptedFile> box}) : _box = box;
 
   @override
   Future<void> saveRecord(EncryptedFile record) async {

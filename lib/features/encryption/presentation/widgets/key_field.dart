@@ -46,9 +46,7 @@ class _KeyFieldState extends State<KeyField> {
           duration: const Duration(seconds: 2),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
-            side: BorderSide(
-              color: Theme.of(context).colorScheme.outline,
-            ),
+            side: BorderSide(color: Theme.of(context).colorScheme.outline),
           ),
         ),
       );

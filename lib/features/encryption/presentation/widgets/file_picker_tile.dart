@@ -83,8 +83,9 @@ class FilePickerTile extends StatelessWidget {
                         Text(
                           label,
                           style: theme.textTheme.titleMedium?.copyWith(
-                            color: theme.colorScheme.onSurface
-                                .withValues(alpha: 0.5),
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.5,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 2),

@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'firebase_options.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:safe_house/injection_container.dart' as di;
-import 'features/encryption/presentation/pages/home_screen.dart';
+import 'core/theme/theme_notifier.dart';
+import 'features/auth/presentation/pages/splash_screen.dart';
+import 'features/auth/presentation/cubits/auth_cubit.dart';
+import 'features/settings/presentation/cubits/settings_cubit.dart';
 
 import 'features/encryption/domain/entities/encrypted_file.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialise Firebase
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // Lock orientation to portrait.
   await SystemChrome.setPreferredOrientations([
@@ -35,141 +44,26 @@ class SafeHouseApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'SafeHouse',
-      debugShowCheckedModeBanner: false,
-      theme: _buildDarkTheme(),
-      home: const HomeScreen(),
-    );
-  }
+    final themeNotifier = di.sl<ThemeNotifier>();
 
-  ThemeData _buildDarkTheme() {
-    const Color background = Color(0xFF0D0D0D);
-    const Color surface = Color(0xFF1A1A1A);
-    const Color accent = Color(0xFF00FF85);
-    const Color onSurface = Color(0xFFE0E0E0);
-    const Color subtle = Color(0xFF2C2C2C);
-
-    return ThemeData(
-      brightness: Brightness.dark,
-      scaffoldBackgroundColor: background,
-      colorScheme: const ColorScheme.dark(
-        primary: accent,
-        onPrimary: Color(0xFF0D0D0D),
-        secondary: accent,
-        onSecondary: Color(0xFF0D0D0D),
-        surface: surface,
-        onSurface: onSurface,
-        outline: subtle,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<AuthCubit>(
+          create: (_) => di.sl<AuthCubit>()..checkAuthStatus(),
+        ),
+        BlocProvider<SettingsCubit>(create: (_) => di.sl<SettingsCubit>()),
+      ],
+      child: ValueListenableBuilder<ThemeData>(
+        valueListenable: themeNotifier,
+        builder: (context, theme, _) {
+          return MaterialApp(
+            title: 'SafeHouse',
+            debugShowCheckedModeBanner: false,
+            theme: theme,
+            home: const SplashScreen(),
+          );
+        },
       ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: background,
-        foregroundColor: onSurface,
-        elevation: 0,
-        centerTitle: false,
-        titleTextStyle: TextStyle(
-          color: onSurface,
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.5,
-        ),
-      ),
-      cardTheme: CardThemeData(
-        color: surface,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: subtle),
-        ),
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: surface,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: subtle),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: subtle),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: accent, width: 1.5),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Color(0xFFFF4D4D)),
-        ),
-        labelStyle: const TextStyle(color: Color(0xFF888888)),
-        hintStyle: const TextStyle(color: Color(0xFF555555)),
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: accent,
-          foregroundColor: const Color(0xFF0D0D0D),
-          elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          textStyle: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.5,
-          ),
-        ),
-      ),
-      outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: onSurface,
-          side: const BorderSide(color: subtle),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-      ),
-      textTheme: const TextTheme(
-        headlineLarge: TextStyle(
-          color: onSurface,
-          fontSize: 28,
-          fontWeight: FontWeight.w700,
-          letterSpacing: -0.5,
-        ),
-        headlineMedium: TextStyle(
-          color: onSurface,
-          fontSize: 22,
-          fontWeight: FontWeight.w600,
-        ),
-        titleLarge: TextStyle(
-          color: onSurface,
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-        ),
-        titleMedium: TextStyle(
-          color: onSurface,
-          fontSize: 15,
-          fontWeight: FontWeight.w500,
-        ),
-        bodyLarge: TextStyle(color: onSurface, fontSize: 15),
-        bodyMedium: TextStyle(color: Color(0xFFAAAAAA), fontSize: 13),
-        labelSmall: TextStyle(
-          color: Color(0xFF666666),
-          fontSize: 11,
-          letterSpacing: 0.8,
-        ),
-      ),
-      dividerTheme: const DividerThemeData(
-        color: subtle,
-        thickness: 1,
-        space: 1,
-      ),
-      iconTheme: const IconThemeData(color: Color(0xFF888888), size: 22),
     );
   }
 }

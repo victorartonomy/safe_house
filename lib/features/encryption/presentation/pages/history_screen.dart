@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
 
-import '../../../../core/auth/biometric_gate.dart';
 import '../../../../injection_container.dart';
 import '../../domain/entities/encrypted_file.dart';
 import '../cubits/history_cubit.dart';
@@ -12,16 +11,12 @@ import '../cubits/history_cubit.dart';
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
 
-  /// History exposes plaintext keys, so it sits behind a biometric /
-  /// device-credential check.
   static Route<void> route() => MaterialPageRoute(
-        builder: (_) => BiometricGate(
-          child: BlocProvider(
-            create: (_) => sl<HistoryCubit>()..loadHistory(),
-            child: const HistoryScreen(),
-          ),
-        ),
-      );
+    builder: (_) => BlocProvider(
+      create: (_) => sl<HistoryCubit>()..loadHistory(),
+      child: const HistoryScreen(),
+    ),
+  );
 
   @override
   State<HistoryScreen> createState() => _HistoryScreenState();
@@ -61,7 +56,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFFFF4D4D)),
+              foregroundColor: const Color(0xFFFF4D4D),
+            ),
             child: const Text('Delete All'),
           ),
         ],
@@ -115,8 +111,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.error_outline,
-                        color: Color(0xFFFF4D4D), size: 40),
+                    const Icon(
+                      Icons.error_outline,
+                      color: Color(0xFFFF4D4D),
+                      size: 40,
+                    ),
                     const SizedBox(height: 12),
                     Text(
                       state.message,
@@ -139,18 +138,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
             final records = state.records;
             if (records.isEmpty) return _EmptyView();
             return ListView.separated(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
               itemCount: records.length,
-              separatorBuilder: (context, index) =>
-                  const SizedBox(height: 10),
+              separatorBuilder: (context, index) => const SizedBox(height: 10),
               itemBuilder: (context, index) {
                 final record = records[index];
                 return _HistoryItemCard(
                   record: record,
                   isKeyRevealed: _revealedIds.contains(record.id),
-                  onToggleKeyVisibility: () =>
-                      _toggleKeyVisibility(record.id),
+                  onToggleKeyVisibility: () => _toggleKeyVisibility(record.id),
                   onDelete: () =>
                       context.read<HistoryCubit>().deleteEntry(record.id),
                 );
@@ -184,9 +180,9 @@ class _HistoryItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final accent = theme.colorScheme.primary;
-    final dateStr = DateFormat('MMM d, yyyy · h:mm a').format(
-      record.createdAt.toLocal(),
-    );
+    final dateStr = DateFormat(
+      'MMM d, yyyy · h:mm a',
+    ).format(record.createdAt.toLocal());
 
     return Container(
       decoration: BoxDecoration(
@@ -210,8 +206,11 @@ class _HistoryItemCard extends StatelessWidget {
                     color: accent.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(Icons.insert_drive_file_outlined,
-                      color: accent, size: 18),
+                  child: Icon(
+                    Icons.insert_drive_file_outlined,
+                    color: accent,
+                    size: 18,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -248,8 +247,7 @@ class _HistoryItemCard extends StatelessWidget {
 
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 14),
-            child: Divider(
-                height: 20, color: theme.colorScheme.outline),
+            child: Divider(height: 20, color: theme.colorScheme.outline),
           ),
 
           // ── Encrypted file path ─────────────────────────────────────
@@ -273,13 +271,16 @@ class _HistoryItemCard extends StatelessWidget {
               children: [
                 Text(
                   'SECRET KEY',
-                  style: theme.textTheme.labelSmall
-                      ?.copyWith(letterSpacing: 1.2),
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    letterSpacing: 1.2,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 10),
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: theme.scaffoldBackgroundColor,
                     borderRadius: BorderRadius.circular(8),
@@ -289,14 +290,11 @@ class _HistoryItemCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          isKeyRevealed
-                              ? record.secretKey
-                              : '•' * 32,
+                          isKeyRevealed ? record.secretKey : '•' * 32,
                           style: theme.textTheme.bodyMedium?.copyWith(
                             fontFamily: 'monospace',
                             fontSize: 12,
-                            letterSpacing:
-                                isKeyRevealed ? 0.4 : 2.0,
+                            letterSpacing: isKeyRevealed ? 0.4 : 2.0,
                           ),
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
@@ -319,12 +317,14 @@ class _HistoryItemCard extends StatelessWidget {
                           tooltip: 'Copy key',
                           onTap: () async {
                             await Clipboard.setData(
-                                ClipboardData(text: record.secretKey));
+                              ClipboardData(text: record.secretKey),
+                            );
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content:
-                                      const Text('Key copied to clipboard'),
+                                  content: const Text(
+                                    'Key copied to clipboard',
+                                  ),
                                   behavior: SnackBarBehavior.floating,
                                   duration: const Duration(seconds: 2),
                                 ),
@@ -365,16 +365,20 @@ class _DataRow extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label,
-            style: theme.textTheme.labelSmall?.copyWith(letterSpacing: 1.2)),
+        Text(
+          label,
+          style: theme.textTheme.labelSmall?.copyWith(letterSpacing: 1.2),
+        ),
         const SizedBox(height: 4),
         Row(
           children: [
             Expanded(
               child: Text(
                 value,
-                style: theme.textTheme.bodyMedium
-                    ?.copyWith(fontFamily: 'monospace', fontSize: 12),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontFamily: 'monospace',
+                  fontSize: 12,
+                ),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
               ),

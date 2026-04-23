@@ -19,8 +19,8 @@ class HistoryCubit extends Cubit<HistoryState> {
   final EncryptionRepository _repository;
 
   HistoryCubit({required EncryptionRepository repository})
-      : _repository = repository,
-        super(const HistoryInitial());
+    : _repository = repository,
+      super(const HistoryInitial());
 
   // ── Read ───────────────────────────────────────────────────────────────────
 

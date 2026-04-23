@@ -14,11 +14,11 @@ class EncryptScreen extends StatefulWidget {
 
   /// Returns a [MaterialPageRoute] that provides a fresh [EncryptionCubit].
   static Route<void> route() => MaterialPageRoute(
-        builder: (_) => BlocProvider(
-          create: (_) => sl<EncryptionCubit>(),
-          child: const EncryptScreen(),
-        ),
-      );
+    builder: (_) => BlocProvider(
+      create: (_) => sl<EncryptionCubit>(),
+      child: const EncryptScreen(),
+    ),
+  );
 
   @override
   State<EncryptScreen> createState() => _EncryptScreenState();
@@ -74,9 +74,12 @@ class _EncryptScreenState extends State<EncryptScreen> {
                 SnackBar(
                   content: Text(state.message),
                   behavior: SnackBarBehavior.floating,
-                  backgroundColor: const Color(0xFFFF4D4D).withValues(alpha: 0.9),
+                  backgroundColor: const Color(
+                    0xFFFF4D4D,
+                  ).withValues(alpha: 0.9),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
               );
           }
@@ -90,16 +93,14 @@ class _EncryptScreenState extends State<EncryptScreen> {
               filePath: state.result.encryptedPath,
               secretKey: state.result.secretKey,
               originalName: state.result.originalName,
-              onEncryptAnother: () =>
-                  context.read<EncryptionCubit>().reset(),
+              onEncryptAnother: () => context.read<EncryptionCubit>().reset(),
             );
           }
 
           final cubit = context.read<EncryptionCubit>();
           final loadingState = state is EncryptionLoading ? state : null;
           final isLoading = loadingState != null;
-          final selectedFile =
-              state is EncryptionFileSelected ? state : null;
+          final selectedFile = state is EncryptionFileSelected ? state : null;
 
           // ── Form view ────────────────────────────────────────────────
           return SingleChildScrollView(
@@ -143,8 +144,7 @@ class _EncryptScreenState extends State<EncryptScreen> {
                         ? null
                         : () => _onEncryptPressed(context, cubit),
                     child: isLoading
-                        ? _LoadingRow(
-                            message: loadingState.message)
+                        ? _LoadingRow(message: loadingState.message)
                         : const Text('Encrypt File'),
                   ),
                 ),
@@ -204,8 +204,7 @@ class _SuccessView extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color:
-                  theme.colorScheme.primary.withValues(alpha: 0.06),
+              color: theme.colorScheme.primary.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: theme.colorScheme.primary.withValues(alpha: 0.3),
@@ -216,8 +215,11 @@ class _SuccessView extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.key_outlined,
-                        color: theme.colorScheme.primary, size: 16),
+                    Icon(
+                      Icons.key_outlined,
+                      color: theme.colorScheme.primary,
+                      size: 16,
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       'Save Your Key',
@@ -337,8 +339,10 @@ class _InfoRow extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label,
-            style: theme.textTheme.labelSmall?.copyWith(letterSpacing: 1)),
+        Text(
+          label,
+          style: theme.textTheme.labelSmall?.copyWith(letterSpacing: 1),
+        ),
         const SizedBox(height: 4),
         ResultCard(
           isSuccess: true,

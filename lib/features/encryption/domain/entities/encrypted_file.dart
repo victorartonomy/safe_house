@@ -41,5 +41,11 @@ class EncryptedFile extends Equatable {
   });
 
   @override
-  List<Object> get props => [id, originalName, encryptedPath, secretKey, createdAt];
+  List<Object> get props => [
+    id,
+    originalName,
+    encryptedPath,
+    secretKey,
+    createdAt,
+  ];
 }

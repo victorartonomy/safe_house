@@ -23,3 +23,7 @@ final class StorageFailure extends Failure {
 final class InvalidKeyFailure extends Failure {
   const InvalidKeyFailure([super.message = 'The provided key is invalid.']);
 }
+
+final class AuthFailure extends Failure {
+  const AuthFailure([super.message = 'Authentication failed.']);
+}
